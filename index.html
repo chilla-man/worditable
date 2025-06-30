@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Communication Helper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f5f5f7;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sentence-area {
+        background: white;
+        padding: 20px;
+        border-bottom: 1px solid #d1d1d6;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .sentence-display {
+        flex: 1;
+        font-size: 24px;
+        line-height: 1.4;
+        color: #1d1d1f;
+        min-height: 40px;
+        padding: 10px;
+        border: 2px solid #e5e5ea;
+        border-radius: 12px;
+        background: #fafafa;
+        margin-right: 15px;
+    }
+
+    .new-word-btn {
+        background: #007aff;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .new-word-btn:hover {
+        background: #0056b3;
+    }
+
+    .clear-btn {
+        background: #ff3b30;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+
+    .predictions {
+        background: #f2f2f7;
+        padding: 15px 20px;
+        border-bottom: 1px solid #d1d1d6;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .prediction-word {
+        background: white;
+        border: 2px solid #007aff;
+        color: #007aff;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .prediction-word:hover {
+        background: #007aff;
+        color: white;
+    }
+
+    .categories {
+        background: white;
+        padding: 15px 20px 0;
+        border-bottom: 1px solid #d1d1d6;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .category-tabs {
+        display: flex;
+        gap: 5px;
+    }
+
+    .category-tab {
+        background: #f2f2f7;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 20px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+    .category-tab.active {
+        background: #007aff;
+        color: white;
+    }
+
+    .category-tab:hover:not(.active) {
+        background: #e5e5ea;
+    }
+
+    .word-library {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    .word-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+    }
+
+    .word-button {
+        background: white;
+        border: 2px solid #e5e5ea;
+        padding: 15px 10px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .word-button:hover {
+        border-color: #007aff;
+        background: #f0f8ff;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+    }
+
+    .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .modal h3 {
+        margin-bottom: 20px;
+        font-size: 20px;
+        color: #1d1d1f;
+    }
+
+    .modal input {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #e5e5ea;
+        border-radius: 12px;
+        font-size: 18px;
+        margin-bottom: 20px;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    .modal-btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .modal-btn.cancel {
+        background: #f2f2f7;
+        color: #1d1d1f;
+    }
+
+    .modal-btn.save {
+        background: #007aff;
+        color: white;
+    }
+
+    .save-sentence-btn {
+        background: #34c759;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="sentence-area">
+        <div class="sentence-display" id="sentence"></div>
+        <div>
+            <button class="new-word-btn" onclick="openNewWordModal()">New Word</button>
+            <button class="save-sentence-btn" onclick="saveSentence()">Save</button>
+            <button class="clear-btn" onclick="clearSentence()">Clear</button>
+        </div>
+    </div>
+
+```
+<div class="predictions" id="predictions">
+    <div class="prediction-word" onclick="addWord('the')">the</div>
+    <div class="prediction-word" onclick="addWord('I')">I</div>
+    <div class="prediction-word" onclick="addWord('want')">want</div>
+</div>
+
+<div class="categories">
+    <div class="category-tabs">
+        <button class="category-tab active" onclick="switchCategory('saved')">Saved</button>
+        <button class="category-tab" onclick="switchCategory('common')">Common</button>
+        <button class="category-tab" onclick="switchCategory('people')">People</button>
+        <button class="category-tab" onclick="switchCategory('actions')">Actions</button>
+        <button class="category-tab" onclick="switchCategory('feelings')">Feelings</button>
+        <button class="category-tab" onclick="switchCategory('food')">Food</button>
+        <button class="category-tab" onclick="switchCategory('places')">Places</button>
+        <button class="category-tab" onclick="switchCategory('time')">Time</button>
+        <button class="category-tab" onclick="switchCategory('new')">New Words</button>
+    </div>
+</div>
+
+<div class="word-library">
+    <div class="word-grid" id="wordGrid"></div>
+</div>
+
+<div class="modal" id="newWordModal">
+    <div class="modal-content">
+        <h3>Add New Word</h3>
+        <input type="text" id="newWordInput" placeholder="Type your word here...">
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" onclick="closeNewWordModal()">Cancel</button>
+            <button class="modal-btn save" onclick="saveNewWord()">Save</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentSentence = [];
+    let currentCategory = 'saved';
+    let savedSentences = [];
+    let newWords = [];
+
+    const wordCategories = {
+        saved: [],
+        common: ['the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'I', 'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at', 'this', 'but', 'his', 'by', 'from', 'they', 'she', 'or', 'an', 'will', 'my', 'one', 'all', 'would', 'there', 'their', 'what', 'so', 'up', 'out', 'if', 'about', 'who', 'get', 'which', 'go', 'me', 'when', 'make', 'can'],
+        people: ['I', 'you', 'he', 'she', 'we', 'they', 'mom', 'dad', 'family', 'friend', 'doctor', 'teacher', 'person', 'people', 'baby', 'child', 'man', 'woman', 'boy', 'girl'],
+        actions: ['go', 'come', 'eat', 'drink', 'sleep', 'walk', 'run', 'sit', 'stand', 'help', 'want', 'need', 'like', 'love', 'see', 'hear', 'touch', 'give', 'take', 'make', 'stop', 'start', 'open', 'close', 'play'],
+        feelings: ['happy', 'sad', 'angry', 'scared', 'excited', 'tired', 'hungry', 'thirsty', 'sick', 'hurt', 'good', 'bad', 'fine', 'okay', 'worried', 'calm', 'surprised', 'confused', 'proud', 'sorry'],
+        food: ['water', 'milk', 'juice', 'coffee', 'tea', 'bread', 'cheese', 'apple', 'banana', 'orange', 'pizza', 'sandwich', 'soup', 'salad', 'chicken', 'fish', 'rice', 'pasta', 'cookies', 'cake'],
+        places: ['home', 'school', 'work', 'hospital', 'store', 'park', 'bathroom', 'kitchen', 'bedroom', 'outside', 'inside', 'here', 'there', 'up', 'down', 'left', 'right', 'near', 'far', 'car'],
+        time: ['now', 'later', 'today', 'tomorrow', 'yesterday', 'morning', 'afternoon', 'evening', 'night', 'early', 'late', 'soon', 'before', 'after', 'always', 'never', 'sometimes', 'often', 'first', 'last'],
+        new: []
+    };
+
+    const commonNextWords = {
+        'I': ['am', 'want', 'need', 'like', 'have', 'go', 'see'],
+        'want': ['to', 'some', 'more', 'help', 'food', 'water', 'go'],
+        'need': ['to', 'help', 'water', 'food', 'bathroom', 'medicine', 'sleep'],
+        'am': ['hungry', 'thirsty', 'tired', 'sick', 'happy', 'sad', 'fine'],
+        'feel': ['good', 'bad', 'sick', 'tired', 'happy', 'sad', 'fine'],
+        'to': ['go', 'eat', 'drink', 'sleep', 'help', 'see', 'play'],
+        'go': ['to', 'home', 'outside', 'bathroom', 'school', 'work', 'sleep'],
+        'like': ['to', 'this', 'that', 'you', 'it', 'food', 'music'],
+        'have': ['to', 'some', 'a', 'my', 'your', 'food', 'water']
+    };
+
+    function updateSentenceDisplay() {
+        document.getElementById('sentence').textContent = currentSentence.join(' ');
+        updatePredictions();
+    }
+
+    function updatePredictions() {
+        const predictionsDiv = document.getElementById('predictions');
+        const lastWord = currentSentence[currentSentence.length - 1];
+        
+        let predictions = ['the', 'I', 'want']; // default
+        
+        if (lastWord && commonNextWords[lastWord.toLowerCase()]) {
+            predictions = commonNextWords[lastWord.toLowerCase()].slice(0, 3);
+        } else if (currentSentence.length === 0) {
+            predictions = ['I', 'you', 'we'];
+        }
+        
+        predictionsDiv.innerHTML = predictions.map(word => 
+            `<div class="prediction-word" onclick="addWord('${word}')">${word}</div>`
+        ).join('');
+    }
+
+    function addWord(word) {
+        currentSentence.push(word);
+        updateSentenceDisplay();
+    }
+
+    function clearSentence() {
+        currentSentence = [];
+        updateSentenceDisplay();
+    }
+
+    function saveSentence() {
+        if (currentSentence.length > 0) {
+            const sentence = currentSentence.join(' ');
+            if (!savedSentences.includes(sentence)) {
+                savedSentences.push(sentence);
+                wordCategories.saved = savedSentences;
+                if (currentCategory === 'saved') {
+                    displayWords();
+                }
+            }
+            clearSentence();
+        }
+    }
+
+    function switchCategory(category) {
+        currentCategory = category;
+        
+        // Update active tab
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        displayWords();
+    }
+
+    function displayWords() {
+        const wordGrid = document.getElementById('wordGrid');
+        let words = [];
+        
+        if (currentCategory === 'saved') {
+            words = savedSentences;
+        } else if (currentCategory === 'new') {
+            words = newWords;
+        } else {
+            words = wordCategories[currentCategory] || [];
+        }
+        
+        if (currentCategory === 'saved') {
+            wordGrid.innerHTML = words.map(sentence => 
+                `<div class="word-button" onclick="loadSentence('${sentence}')" style="grid-column: span 2;">${sentence}</div>`
+            ).join('');
+        } else {
+            wordGrid.innerHTML = words.map(word => 
+                `<div class="word-button" onclick="addWord('${word}')">${word}</div>`
+            ).join('');
+        }
+    }
+
+    function loadSentence(sentence) {
+        currentSentence = sentence.split(' ');
+        updateSentenceDisplay();
+    }
+
+    function openNewWordModal() {
+        document.getElementById('newWordModal').style.display = 'block';
+        document.getElementById('newWordInput').focus();
+    }
+
+    function closeNewWordModal() {
+        document.getElementById('newWordModal').style.display = 'none';
+        document.getElementById('newWordInput').value = '';
+    }
+
+    function saveNewWord() {
+        const input = document.getElementById('newWordInput');
+        const word = input.value.trim();
+        
+        if (word) {
+            newWords.push(word);
+            wordCategories.new = newWords;
+            if (currentCategory === 'new') {
+                displayWords();
+            }
+            closeNewWordModal();
+        }
+    }
+
+    // Handle Enter key in modal
+    document.getElementById('newWordInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            saveNewWord();
+        }
+    });
+
+    // Initialize
+    displayWords();
+    updateSentenceDisplay();
+</script>
+```
+
+</body>
+</html>
